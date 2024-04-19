@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -9,11 +10,13 @@ import (
 
 	"github.com/Puttipong1/assessment-tax/config"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
 func main() {
 	config := config.NewConfig()
 	e := echo.New()
+	e.Logger.SetLevel(log.INFO)
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
 	})
@@ -22,8 +25,9 @@ func main() {
 	defer stop()
 
 	go func() {
-		if err := e.Start(config.ServerConfig().Port()); err != nil && err != http.ErrServerClosed {
-			e.Logger.Fatal("shutting down the server")
+		err := e.Start(config.ServerConfig().Port())
+		if err != nil && err != http.ErrServerClosed { // Start server
+			fmt.Println("shutting down the server")
 		}
 	}()
 
@@ -31,6 +35,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Fatal(err)
+		e.Logger.Info(err)
 	}
 }
