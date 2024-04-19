@@ -1,15 +1,27 @@
 package config
 
 type Config struct {
-	Auth   AdminConfig
-	DB     DBConfig
-	Server ServerConfig
+	admin  AdminConfig
+	db     DBConfig
+	server ServerConfig
 }
 
 func NewConfig() *Config {
 	return &Config{
-		Auth:   loadAdminConfig(),
-		DB:     LoadDBConfig(),
-		Server: LoadServerConfig(),
+		admin:  loadAdminConfig(),
+		db:     LoadDBConfig(),
+		server: LoadServerConfig(),
 	}
+}
+
+func (config *Config) AdminConfig() *AdminConfig {
+	return &config.admin
+}
+
+func (config *Config) DBConfig() *DBConfig {
+	return &config.db
+}
+
+func (config *Config) ServerConfig() *ServerConfig {
+	return &config.server
 }

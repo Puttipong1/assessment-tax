@@ -3,11 +3,15 @@ package config
 import "os"
 
 type ServerConfig struct {
-	Port string
+	port string
 }
 
 func LoadServerConfig() ServerConfig {
 	return ServerConfig{
-		Port: ":" + os.Getenv("SERVER_PORT"),
+		port: ":" + os.Getenv("SERVER_PORT"),
 	}
+}
+
+func (serverConfig *ServerConfig) Port() string {
+	return serverConfig.port
 }
