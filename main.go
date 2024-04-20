@@ -10,13 +10,13 @@ import (
 	"github.com/Puttipong1/assessment-tax/common"
 	"github.com/Puttipong1/assessment-tax/config"
 	"github.com/Puttipong1/assessment-tax/server"
-	"github.com/Puttipong1/assessment-tax/server/routes"
+	"github.com/Puttipong1/assessment-tax/server/route"
 )
 
 func main() {
 	log := config.Logger()
 	server := server.NewServer()
-	routes.ConfigureRoutes(server)
+	route.ConfigureRoutes(server)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
