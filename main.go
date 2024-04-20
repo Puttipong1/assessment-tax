@@ -7,34 +7,30 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/Puttipong1/assessment-tax/common"
 	"github.com/Puttipong1/assessment-tax/config"
-	"github.com/Puttipong1/assessment-tax/logger"
-	"github.com/labstack/echo/v4"
+	"github.com/Puttipong1/assessment-tax/server"
+	"github.com/Puttipong1/assessment-tax/server/routes"
 )
 
 func main() {
-	log := logger.Get()
-	config := config.NewConfig()
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		time.Sleep(90 * time.Second)
-		return c.String(http.StatusOK, "Hello, Go Bootcamp!")
-	})
-
+	log := config.Logger()
+	server := server.NewServer()
+	routes.ConfigureRoutes(server)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
 	go func() {
-		err := e.Start(config.ServerConfig().Port())
+		err := server.Echo.Start(server.Config.ServerConfig().Port())
 		if err != nil && err != http.ErrServerClosed { // Start server
-			log.Fatal().Err(err).Msg("Shutting down the server")
+			log.Fatal().Err(err).Msg(common.ShutDownServerMessage)
 		}
 	}()
 
 	<-ctx.Done()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := e.Shutdown(ctx); err != nil {
+	if err := server.Echo.Shutdown(ctx); err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
 }

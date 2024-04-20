@@ -1,4 +1,4 @@
-package logger
+package config
 
 import (
 	"io"
@@ -14,7 +14,7 @@ var once sync.Once
 
 var log zerolog.Logger
 
-func Get() zerolog.Logger {
+func Logger() zerolog.Logger {
 	once.Do(func() {
 		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 		zerolog.TimeFieldFormat = time.RFC3339Nano
