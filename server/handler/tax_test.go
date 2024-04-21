@@ -37,7 +37,7 @@ func taxTestSetup(test model.Test, t *testing.T) (echo.Context, *httptest.Respon
 func TestCalculateTax(t *testing.T) {
 	t.Run("CalculateTax Success", func(t *testing.T) {
 		body, _ := json.Marshal(request.Tax{
-			TotalIncome: 0.0,
+			TotalIncome: 10.0,
 			Wht:         0.0,
 			Allowances: []request.Allowances{
 				{AllowanceType: "donation", Amount: 0.0},
