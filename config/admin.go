@@ -1,6 +1,10 @@
 package config
 
-import "os"
+import (
+	"os"
+
+	"github.com/Puttipong1/assessment-tax/common"
+)
 
 type AdminConfig struct {
 	adminUsername string
@@ -8,9 +12,16 @@ type AdminConfig struct {
 }
 
 func loadAdminConfig() AdminConfig {
+	//log := Logger()
+	username := os.Getenv("ADMIN_USERNAME")
+	password := os.Getenv("ADMIN_PASSWORD")
+	if username == "" || password == "" {
+		log.Error().Msgf(common.GetEnvErrorMessage, "ADMIN_USERNAME or ADMIN_PASSWORD", common.ShutDownServerMessage)
+		os.Exit(0)
+	}
 	return AdminConfig{
-		adminUsername: os.Getenv("ADMIN_USERNAME"),
-		adminPassword: os.Getenv("ADMIN_PASSWORD"),
+		adminUsername: username,
+		adminPassword: password,
 	}
 }
 
