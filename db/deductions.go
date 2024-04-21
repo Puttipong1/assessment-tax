@@ -1,9 +1,16 @@
 package db
 
 import (
+	"github.com/Puttipong1/assessment-tax/common"
 	"github.com/Puttipong1/assessment-tax/config"
+	"github.com/Puttipong1/assessment-tax/model"
 	"github.com/Puttipong1/assessment-tax/model/response"
 )
+
+type deduction struct {
+	deduction string  `postgres:"type"`
+	amount    float64 `postgres:"amount"`
+}
 
 func (db *DB) UpdateDeductions(deductionsType string, amount float64) error {
 	log := config.Logger()
@@ -23,4 +30,32 @@ func (db *DB) UpdateDeductions(deductionsType string, amount float64) error {
 		return &response.Error{}
 	}
 	return nil
+}
+
+func (db *DB) GetDeductions() (model.Deduction, error) {
+	log := config.Logger()
+	d := model.Deduction{}
+	query := "SELECT type, amount FROM deductions WHERE type IN ($1)"
+	rows, err := db.DB.Query(query, common.PersonalDeductionsType)
+	if err != nil {
+		log.Error().Err(err).Msg("Can't get deductions from database")
+		return d, err
+	}
+	var deductions []deduction
+	for rows.Next() {
+		var deduction deduction
+		err := rows.Scan(&deduction.deduction, &deduction.amount)
+		if err != nil {
+			log.Error().Err(err).Msg("")
+			return d, err
+		}
+		deductions = append(deductions, deduction)
+	}
+	for _, deduction := range deductions {
+		if deduction.deduction == common.PersonalDeductionsType {
+			d.Personal = deduction.amount
+		}
+	}
+	log.Info().Msgf("deductions: %v", d)
+	return d, nil
 }
