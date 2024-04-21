@@ -32,5 +32,6 @@ func ConfigureRoutes(server *server.Server) {
 		}
 		return false, nil
 	}))
-	a.POST("/deductions/k-receipt", adminHandler.UpdateKReceipt)
+	a.POST("/deductions/k-receipt", adminHandler.UpdateKReceiptDeduction)
+	a.POST("/deductions/personal", adminHandler.UpdatePersonalDeduction)
 }

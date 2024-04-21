@@ -1,9 +1,11 @@
 package common
 
 const (
-	// Deductions Type
-	PersonalDeductions = "personal"
-	KReceiptDeductions = "k-receipt"
+	// Deductions
+	PersonalDeductions     = "Personal Deductions"
+	KReceiptDeductions     = "K-Receipt Deductions"
+	PersonalDeductionsType = "personal"
+	KReceiptDeductionsType = "k-receipt"
 	// Error Message
 	BadRequestErrorMessage     = "Data sent to the server has an error or exceeds a limit"
 	GetEnvErrorMessage         = "Can't get %s from env: %s"

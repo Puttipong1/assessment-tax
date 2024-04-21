@@ -21,7 +21,7 @@ func NewAdminHandler(server *server.Server) *AdminHandler {
 	return &AdminHandler{DB: server.DB}
 }
 
-func (handler *AdminHandler) UpdateKReceipt(c echo.Context) error {
+func (handler *AdminHandler) UpdateKReceiptDeduction(c echo.Context) error {
 	log := config.Logger()
 	deductions := &request.KReceiptDeductions{}
 	if err := c.Bind(deductions); err != nil {
@@ -30,11 +30,29 @@ func (handler *AdminHandler) UpdateKReceipt(c echo.Context) error {
 	}
 	if err := c.Validate(deductions); err != nil {
 		log.Error().Msg(err.Error())
-		return c.JSON(http.StatusBadRequest, response.Error{Message: fmt.Sprintf(common.IncorrectDeductionsMessage, "K-Receipt Deductions")})
+		return c.JSON(http.StatusBadRequest, response.Error{Message: fmt.Sprintf(common.IncorrectDeductionsMessage, common.KReceiptDeductions)})
 	}
-	err := handler.DB.UpdateDeductions(common.KReceiptDeductions, deductions.Amount)
+	err := handler.DB.UpdateDeductions(common.KReceiptDeductionsType, deductions.Amount)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK, response.KReceiptDeductions{KReceipt: deductions.Amount})
+}
+
+func (handler *AdminHandler) UpdatePersonalDeduction(c echo.Context) error {
+	log := config.Logger()
+	deductions := &request.PersonalDeductions{}
+	if err := c.Bind(deductions); err != nil {
+		log.Error().Msg(err.Error())
+		return c.JSON(http.StatusBadRequest, response.Error{Message: common.BadRequestErrorMessage})
+	}
+	if err := c.Validate(deductions); err != nil {
+		log.Error().Msg(err.Error())
+		return c.JSON(http.StatusBadRequest, response.Error{Message: fmt.Sprintf(common.IncorrectDeductionsMessage, common.PersonalDeductions)})
+	}
+	err := handler.DB.UpdateDeductions(common.PersonalDeductionsType, deductions.Amount)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	return c.JSON(http.StatusOK, response.PersonalDeductions{PersonalDeduction: deductions.Amount})
 }

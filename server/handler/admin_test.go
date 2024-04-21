@@ -50,7 +50,7 @@ func TestUpdateKReceipt(t *testing.T) {
 		mock.ExpectExec("UPDATE deductions").WillReturnResult(driver.RowsAffected(1))
 		defer database.Close()
 		h := &handler.AdminHandler{DB: &db.DB{DB: database}}
-		if assert.NoError(t, h.UpdateKReceipt(c)) {
+		if assert.NoError(t, h.UpdateKReceiptDeduction(c)) {
 			response := response.KReceiptDeductions{}
 			err := json.Unmarshal(rec.Body.Bytes(), &response)
 			assert.Equal(t, http.StatusOK, rec.Code)
@@ -74,7 +74,7 @@ func TestUpdateKReceipt(t *testing.T) {
 		mock.ExpectExec("UPDATE deductions").WillReturnResult(driver.RowsAffected(1))
 		defer database.Close()
 		h := &handler.AdminHandler{DB: &db.DB{DB: database}}
-		if assert.NoError(t, h.UpdateKReceipt(c)) {
+		if assert.NoError(t, h.UpdateKReceiptDeduction(c)) {
 			assert.Equal(t, http.StatusBadRequest, rec.Code)
 		}
 	})
@@ -94,7 +94,7 @@ func TestUpdateKReceipt(t *testing.T) {
 		mock.ExpectExec("UPDATE deductions").WillReturnResult(driver.RowsAffected(1))
 		defer database.Close()
 		h := &handler.AdminHandler{DB: &db.DB{DB: database}}
-		if assert.NoError(t, h.UpdateKReceipt(c)) {
+		if assert.NoError(t, h.UpdateKReceiptDeduction(c)) {
 			assert.Equal(t, http.StatusBadRequest, rec.Code)
 		}
 	})
@@ -114,7 +114,7 @@ func TestUpdateKReceipt(t *testing.T) {
 		mock.ExpectExec("UPDATE deductions").WillReturnError(*new(error))
 		defer database.Close()
 		h := &handler.AdminHandler{DB: &db.DB{DB: database}}
-		if assert.NoError(t, h.UpdateKReceipt(c)) {
+		if assert.NoError(t, h.UpdateKReceiptDeduction(c)) {
 			assert.Equal(t, http.StatusInternalServerError, rec.Code)
 		}
 	})
@@ -134,7 +134,7 @@ func TestUpdateKReceipt(t *testing.T) {
 		mock.ExpectExec("UPDATE deductions").WillReturnResult(driver.RowsAffected(0))
 		defer database.Close()
 		h := &handler.AdminHandler{DB: &db.DB{DB: database}}
-		if assert.NoError(t, h.UpdateKReceipt(c)) {
+		if assert.NoError(t, h.UpdateKReceiptDeduction(c)) {
 			assert.Equal(t, http.StatusInternalServerError, rec.Code)
 		}
 	})
