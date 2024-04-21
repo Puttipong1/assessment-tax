@@ -14,11 +14,11 @@ import (
 )
 
 type AdminHandler struct {
-	db *db.DB
+	DB *db.DB
 }
 
 func NewAdminHandler(server *server.Server) *AdminHandler {
-	return &AdminHandler{db: server.DB}
+	return &AdminHandler{DB: server.DB}
 }
 
 func (handler *AdminHandler) UpdateKReceipt(c echo.Context) error {
@@ -32,7 +32,7 @@ func (handler *AdminHandler) UpdateKReceipt(c echo.Context) error {
 		log.Error().Msg(err.Error())
 		return c.JSON(http.StatusBadRequest, response.Error{Message: fmt.Sprintf(common.IncorrectDeductionsMessage, "K-Receipt Deductions")})
 	}
-	err := handler.db.UpdateDeductions(common.KReceiptDeductions, deductions.Amount)
+	err := handler.DB.UpdateDeductions(common.KReceiptDeductions, deductions.Amount)
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
