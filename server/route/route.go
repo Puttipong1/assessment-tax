@@ -10,6 +10,7 @@ import (
 
 func ConfigureRoutes(server *server.Server) {
 	adminHandler := handler.NewAdminHandler(server)
+	taxHandler := handler.NewTaxHandler(server)
 	log := config.Logger()
 	server.Echo.Use(middleware.Recover())
 	server.Echo.Use(middleware.RequestID())
@@ -25,6 +26,7 @@ func ConfigureRoutes(server *server.Server) {
 			return nil
 		},
 	}))
+	server.Echo.POST("/tax/calculations", taxHandler.CalculateTax)
 	a := server.Echo.Group("/admin")
 	a.Use(middleware.BasicAuth(func(username, password string, ctx echo.Context) (bool, error) {
 		if username == server.Config.AdminConfig().UserName() && password == server.Config.AdminConfig().Password() {
