@@ -24,7 +24,7 @@ import (
 
 const calculateTaxPath = "/tax/calculations"
 
-func taxTestSetup(test model.Test, t *testing.T) (echo.Context, *httptest.ResponseRecorder) {
+func taxTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	e.Validator = &server.CustomValidator{Validator: validator.New(validator.WithRequiredStructEnabled())}
 	req := httptest.NewRequest(test.HttpMethod, test.Path, bytes.NewBuffer(test.Json))
@@ -53,7 +53,7 @@ func TestCalculateTax(t *testing.T) {
 			HttpMethod: http.MethodPost,
 			Path:       calculateTaxPath,
 			Json:       body,
-		}, t)
+		})
 		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
 		if assert.NoError(t, h.CalculateTax(c)) {
 			var res response.TaxSummary
