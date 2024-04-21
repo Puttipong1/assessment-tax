@@ -39,11 +39,13 @@ func TestCalculateTax(t *testing.T) {
 		body, _ := json.Marshal(request.Tax{
 			TotalIncome: 0.0,
 			Wht:         0.0,
-			Allowances:  make([]request.Allowances, 1),
+			Allowances: []request.Allowances{
+				{AllowanceType: "donation", Amount: 0.0},
+			},
 		})
 		c, rec, _, handler := taxTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
-			Path:       "/",
+			Path:       calculateTaxPath,
 			Json:       body,
 		}, t)
 		if assert.NoError(t, handler.CalculateTax(c)) {
