@@ -42,6 +42,7 @@ func (handler *AdminHandler) UpdateKReceiptDeduction(c echo.Context) error {
 func (handler *AdminHandler) UpdatePersonalDeduction(c echo.Context) error {
 	log := config.Logger()
 	deductions := &request.PersonalDeductions{}
+	log.Info().Msgf("---------%f", deductions.Amount)
 	if err := c.Bind(deductions); err != nil {
 		log.Error().Msg(err.Error())
 		return c.JSON(http.StatusBadRequest, response.Error{Message: common.BadRequestErrorMessage})
