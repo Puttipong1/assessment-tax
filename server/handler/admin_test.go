@@ -10,6 +10,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/Puttipong1/assessment-tax/db"
+	"github.com/Puttipong1/assessment-tax/model"
 	"github.com/Puttipong1/assessment-tax/model/request"
 	"github.com/Puttipong1/assessment-tax/model/response"
 	"github.com/Puttipong1/assessment-tax/server"
@@ -19,29 +20,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type test struct {
-	httpMethod string
-	path       string
-	json       []byte
-}
-
-func setup(test test) (echo.Context, *httptest.ResponseRecorder) {
+func adminTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	e.Validator = &server.CustomValidator{Validator: validator.New(validator.WithRequiredStructEnabled())}
-	req := httptest.NewRequest(test.httpMethod, test.path, bytes.NewBuffer(test.json))
+	req := httptest.NewRequest(test.HttpMethod, test.Path, bytes.NewBuffer(test.Json))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	return c, rec
 }
 func TestUpdateKReceiptDeduction(t *testing.T) {
-	t.Run("Update K-Receipt Deduction Successful", func(t *testing.T) {
+	t.Run("Update K-Receipt Deduction Success", func(t *testing.T) {
 		amount := 60000.0
 		body, _ := json.Marshal(request.KReceiptDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/k-receipt",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/k-receipt",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -62,10 +57,10 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 	t.Run("Update K-Receipt Deduction Fail (amount <= 0.0)", func(t *testing.T) {
 		amount := 0.0
 		body, _ := json.Marshal(request.KReceiptDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/k-receipt",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/k-receipt",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -82,10 +77,10 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 	t.Run("Update K-Receipt Deduction Fail (amount > 100000.0)", func(t *testing.T) {
 		amount := 100000.1
 		body, _ := json.Marshal(request.KReceiptDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/k-receipt",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/k-receipt",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -102,10 +97,10 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 	t.Run("Update K-Receipt Deduction Fail (error during update)", func(t *testing.T) {
 		amount := 100000.0
 		body, _ := json.Marshal(request.KReceiptDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/k-receipt",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/k-receipt",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -122,10 +117,10 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 	t.Run("Update K-Receipt Deduction Fail (affected row = 0)", func(t *testing.T) {
 		amount := 100000.0
 		body, _ := json.Marshal(request.KReceiptDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/k-receipt",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/k-receipt",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -140,13 +135,13 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 	})
 }
 func TestUpdatePersonalDeduction(t *testing.T) {
-	t.Run("Update Personal Deductions Successful", func(t *testing.T) {
+	t.Run("Update Personal Deductions Success", func(t *testing.T) {
 		amount := 60000.0
 		body, _ := json.Marshal(request.PersonalDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/personal",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/personal",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -167,10 +162,10 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 	t.Run("Update Personal Deductions  Fail (amount <= 10000.0)", func(t *testing.T) {
 		amount := 9999.9
 		body, _ := json.Marshal(request.PersonalDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/personal",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/personal",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -187,10 +182,10 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 	t.Run("Update Personal Deductions Fail (amount > 100000.0)", func(t *testing.T) {
 		amount := 100000.1
 		body, _ := json.Marshal(request.PersonalDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/personal",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/personal",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -207,10 +202,10 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 	t.Run("Update Personal Deductions Fail (error during update)", func(t *testing.T) {
 		amount := 100000.0
 		body, _ := json.Marshal(request.PersonalDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/personal",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/personal",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -227,10 +222,10 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 	t.Run("Update Personal Deductions Fail (affected row = 0)", func(t *testing.T) {
 		amount := 100000.0
 		body, _ := json.Marshal(request.PersonalDeductions{Amount: amount})
-		c, rec := setup(test{
-			httpMethod: http.MethodPost,
-			path:       "/admin/deductions/personal",
-			json:       body,
+		c, rec := adminTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       "/admin/deductions/personal",
+			Json:       body,
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
