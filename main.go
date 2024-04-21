@@ -31,6 +31,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := server.Echo.Shutdown(ctx); err != nil {
-		log.Fatal().Err(err).Msg("")
+		log.Fatal().Err(err).Msg(common.ShutDownServerMessage)
 	}
 }

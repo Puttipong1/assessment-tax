@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/Puttipong1/assessment-tax/config"
+	"github.com/Puttipong1/assessment-tax/db"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -10,6 +11,7 @@ type (
 	Server struct {
 		Echo   *echo.Echo
 		Config *config.Config
+		DB     *db.DB
 	}
 
 	CustomValidator struct {
@@ -28,9 +30,10 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 func NewServer() *Server {
 	echo := echo.New()
 	echo.Validator = &CustomValidator{validator: validator.New(validator.WithRequiredStructEnabled())}
-
+	config := config.NewConfig()
 	return &Server{
 		Echo:   echo,
-		Config: config.NewConfig(),
+		Config: config,
+		DB:     db.Init(config.DBConfig()),
 	}
 }

@@ -4,8 +4,8 @@ go 1.21.0
 
 require (
 	github.com/go-playground/validator/v10 v10.19.0
-	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.32.0
 )
 

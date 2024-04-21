@@ -27,11 +27,10 @@ func ConfigureRoutes(server *server.Server) {
 	}))
 	a := server.Echo.Group("/admin")
 	a.Use(middleware.BasicAuth(func(username, password string, ctx echo.Context) (bool, error) {
-		log.Info().Msgf("Test %s %s", username, password)
 		if username == server.Config.AdminConfig().UserName() && password == server.Config.AdminConfig().Password() {
 			return true, nil
 		}
 		return false, nil
 	}))
-	a.POST("/deductions/k-receipt", adminHandler.Login)
+	a.POST("/deductions/k-receipt", adminHandler.UpdateKReceipt)
 }
