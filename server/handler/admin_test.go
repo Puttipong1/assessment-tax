@@ -13,16 +13,15 @@ import (
 	"github.com/Puttipong1/assessment-tax/model"
 	"github.com/Puttipong1/assessment-tax/model/request"
 	"github.com/Puttipong1/assessment-tax/model/response"
-	"github.com/Puttipong1/assessment-tax/server"
 	"github.com/Puttipong1/assessment-tax/server/handler"
-	"github.com/go-playground/validator/v10"
+	"github.com/Puttipong1/assessment-tax/server/validate"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
 func adminTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
-	e.Validator = &server.CustomValidator{Validator: validator.New(validator.WithRequiredStructEnabled())}
+	e.Validator = validate.New()
 	req := httptest.NewRequest(test.HttpMethod, test.Path, bytes.NewBuffer(test.Json))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
