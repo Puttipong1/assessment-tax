@@ -9,6 +9,7 @@ import (
 	"github.com/Puttipong1/assessment-tax/model/request"
 	"github.com/Puttipong1/assessment-tax/model/response"
 	"github.com/Puttipong1/assessment-tax/server"
+	"github.com/Puttipong1/assessment-tax/server/validate"
 	"github.com/Puttipong1/assessment-tax/service"
 	"github.com/labstack/echo/v4"
 )
@@ -33,8 +34,7 @@ func (handler *TaxHandler) CalculateTax(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Error{Message: common.BadRequestErrorMessage})
 	}
 	if err := c.Validate(tax); err != nil {
-		log.Error().Msg(err.Error())
-		return c.JSON(http.StatusBadRequest, response.Error{Message: err.Error()})
+		return c.JSON(http.StatusBadRequest, validate.ErrorMessage(err))
 	}
 	deduction, err := handler.DB.GetDeductions()
 	if err != nil {

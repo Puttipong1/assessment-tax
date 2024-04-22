@@ -14,10 +14,9 @@ import (
 	"github.com/Puttipong1/assessment-tax/model"
 	"github.com/Puttipong1/assessment-tax/model/request"
 	"github.com/Puttipong1/assessment-tax/model/response"
-	"github.com/Puttipong1/assessment-tax/server"
 	"github.com/Puttipong1/assessment-tax/server/handler"
+	"github.com/Puttipong1/assessment-tax/server/validate"
 	"github.com/Puttipong1/assessment-tax/service"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +25,7 @@ const calculateTaxPath = "/tax/calculations"
 
 func taxTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
-	e.Validator = &server.CustomValidator{Validator: validator.New(validator.WithRequiredStructEnabled())}
+	e.Validator = validate.New()
 	req := httptest.NewRequest(test.HttpMethod, test.Path, bytes.NewBuffer(test.Json))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
@@ -43,10 +42,10 @@ func TestCalculateTax(t *testing.T) {
 		defer database.Close()
 		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
 		body, _ := json.Marshal(request.Tax{
-			TotalIncome: 500000.0,
-			Wht:         25000.0,
+			TotalIncome: 850000.0,
+			Wht:         20000.0,
 			Allowances: []request.Allowances{
-				{AllowanceType: "donation", Amount: 0.0},
+				{AllowanceType: "donation", Amount: 50000.0},
 			},
 		})
 		c, rec := taxTestSetup(model.Test{
@@ -60,7 +59,7 @@ func TestCalculateTax(t *testing.T) {
 			err := json.Unmarshal(rec.Body.Bytes(), &res)
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.True(t, reflect.DeepEqual(response.TaxSummary{Tax: 4000}, res))
+			assert.True(t, reflect.DeepEqual(response.TaxSummary{Tax: 51000}, res))
 		}
 	})
 }
