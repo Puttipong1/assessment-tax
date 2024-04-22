@@ -44,7 +44,7 @@ func TestCalculateTax(t *testing.T) {
 		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
 		body, _ := json.Marshal(request.Tax{
 			TotalIncome: 500000.0,
-			Wht:         5000.0,
+			Wht:         25000.0,
 			Allowances: []request.Allowances{
 				{AllowanceType: "donation", Amount: 0.0},
 			},
@@ -60,7 +60,7 @@ func TestCalculateTax(t *testing.T) {
 			err := json.Unmarshal(rec.Body.Bytes(), &res)
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.True(t, reflect.DeepEqual(response.TaxSummary{Tax: 28500}, res))
+			assert.True(t, reflect.DeepEqual(response.TaxSummary{Tax: 4000}, res))
 		}
 	})
 }
