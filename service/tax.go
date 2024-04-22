@@ -1,6 +1,8 @@
 package service
 
 import (
+	"math"
+
 	"github.com/Puttipong1/assessment-tax/model"
 	"github.com/Puttipong1/assessment-tax/model/request"
 	"github.com/Puttipong1/assessment-tax/model/response"
@@ -14,20 +16,34 @@ func NewTaxService() *TaxService {
 	return &TaxService{}
 }
 
-func (service *TaxService) CalculateTax(tax request.Tax, deduction model.Deduction) response.TaxSummary {
-	if tax.TotalIncome < 150000.99 {
-		return response.TaxSummary{Tax: 0.0}
-	} else if tax.TotalIncome >= 150001 && tax.TotalIncome <= 500000.99 {
-		amount := decimal.NewFromFloat((tax.TotalIncome - 150000 - tax.Wht - deduction.Personal) * 0.1)
-		return response.TaxSummary{Tax: amount.InexactFloat64()}
-	} else if tax.TotalIncome >= 500001 && tax.TotalIncome <= 1000000.99 {
-		amount := decimal.NewFromFloat((tax.TotalIncome - 500000 - tax.Wht - deduction.Personal) * 0.15)
-		return response.TaxSummary{Tax: amount.InexactFloat64()}
-	} else if tax.TotalIncome >= 1000001 && tax.TotalIncome <= 2000000.99 {
-		amount := decimal.NewFromFloat((tax.TotalIncome - 150000 - tax.Wht - deduction.Personal) * 0.2)
-		return response.TaxSummary{Tax: amount.InexactFloat64()}
+func (service *TaxService) CalculateTax(t request.Tax, deduction model.Deduction) response.TaxSummary {
+	netIncome := t.TotalIncome - deduction.Personal
+	baseTax, taxRate := getTaxRate(netIncome)
+	total := decimal.NewFromFloat((netIncome - baseTax) * taxRate)
+	tax := total.InexactFloat64() - t.Wht
+	return getTaxSummary(tax)
+}
+
+func getTaxRate(total float64) (float64, float64) {
+	if total < 150000.99 {
+		return 0, 0
+	} else if total >= 150001 && total <= 500000.99 {
+		return 150000, 0.1
+	} else if total >= 500001 && total <= 1000000.99 {
+		return 500000, 0.15
+	} else if total >= 1000001 && total <= 2000000.99 {
+		return 1000000, 0.2
 	} else {
-		amount := decimal.NewFromFloat((tax.TotalIncome - 2000000 - tax.Wht - deduction.Personal) * 0.35)
-		return response.TaxSummary{Tax: amount.InexactFloat64()}
+		return 2000000, 0.35
 	}
+}
+
+func getTaxSummary(tax float64) response.TaxSummary {
+	if tax < 0 {
+		refund := math.Abs(tax)
+		return response.TaxSummary{Tax: 0, TaxRefund: &refund}
+	} else {
+		return response.TaxSummary{Tax: tax}
+	}
+
 }
