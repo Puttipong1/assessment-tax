@@ -6,6 +6,6 @@ type Tax struct {
 	Allowances  []Allowances `json:"allowance" validate:"required,dive,required"`
 }
 type Allowances struct {
-	AllowanceType string  `json:"totalIncome" validate:"required"`
+	AllowanceType string  `json:"AllowanceType" validate:"required,eq=donation"`
 	Amount        float64 `json:"amount" validate:"gte=0.0"`
 }
