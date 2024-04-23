@@ -3,6 +3,7 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -42,10 +43,10 @@ func TestCalculateTax(t *testing.T) {
 		defer database.Close()
 		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
 		body, _ := json.Marshal(request.Tax{
-			TotalIncome: 850000.0,
-			Wht:         20000.0,
+			TotalIncome: 2600000,
+			Wht:         240000,
 			Allowances: []request.Allowances{
-				{AllowanceType: "donation", Amount: 50000.0},
+				{AllowanceType: "donation", Amount: 100000},
 			},
 		})
 		c, rec := taxTestSetup(model.Test{
@@ -59,7 +60,8 @@ func TestCalculateTax(t *testing.T) {
 			err := json.Unmarshal(rec.Body.Bytes(), &res)
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, rec.Code)
-			assert.True(t, reflect.DeepEqual(response.TaxSummary{Tax: 51000}, res))
+			fmt.Println(rec.Body.String())
+			assert.True(t, reflect.DeepEqual(response.TaxSummary{Tax: 224000, TaxLevel: response.NewTaxLevel5(154000.0)}, res))
 		}
 	})
 }

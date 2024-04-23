@@ -1,6 +1,15 @@
 package common
 
 const (
+	// Tax Level
+	TaxLevel1      = "0-150000"
+	TaxLevel2      = "150,001-500,000"
+	TaxLevel2Value = 35000.0
+	TaxLevel3      = "500,001-1,000,000"
+	TaxLevel3Value = 75000.0
+	TaxLevel4      = "1,000,001-2,000,000"
+	TaxLevel4Value = 200000.0
+	TaxLevel5      = "2,000,001 ขึ้นไป"
 	// Deductions
 	PersonalDeductions      = "Personal Deductions"
 	KReceiptDeductions      = "K-Receipt Deductions"
