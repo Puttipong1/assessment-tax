@@ -1,13 +1,18 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"math"
+	"mime/multipart"
 
 	"github.com/Puttipong1/assessment-tax/common"
+	"github.com/Puttipong1/assessment-tax/config"
 	"github.com/Puttipong1/assessment-tax/model"
 	"github.com/Puttipong1/assessment-tax/model/request"
 	"github.com/Puttipong1/assessment-tax/model/response"
+	"github.com/jszwec/csvutil"
 	"github.com/shopspring/decimal"
 )
 
@@ -37,6 +42,23 @@ func (service *TaxService) CalculateTax(t request.Tax, deduction model.Deduction
 	summary := getTaxSummary(sumTaxLevel(taxLevel), t.Wht)
 	summary.TaxLevel = taxLevel
 	return summary
+}
+
+func (service *TaxService) ReadTaxCSV(file multipart.File) {
+	log := config.Logger()
+	buffer := new(bytes.Buffer)
+	if _, err := io.Copy(buffer, file); err != nil {
+		log.Error().Msg(err.Error())
+	}
+	log.Info().Msg(string(buffer.Bytes()[:]))
+	taxCsv := []model.TaxCSV{}
+	if err := csvutil.Unmarshal(buffer.Bytes(), &taxCsv); err != nil {
+		log.Error().Msg(err.Error())
+	}
+	log.Info().Msgf("test %d", len(taxCsv))
+	for _, csv := range taxCsv {
+		log.Info().Msgf("%f %f %f", csv.TotalIncome, csv.Wht, csv.Donation)
+	}
 }
 
 func calculateNetIncome(income float64, deduction *model.Deduction) float64 {

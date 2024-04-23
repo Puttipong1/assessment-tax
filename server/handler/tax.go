@@ -61,5 +61,6 @@ func (handler *TaxHandler) CalculateTaxCSV(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Error{Message: err.Error()})
 	}
 	defer file.Close()
+	handler.TaxService.ReadTaxCSV(file)
 	return c.JSON(http.StatusOK, "")
 }

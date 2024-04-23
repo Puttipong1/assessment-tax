@@ -25,6 +25,13 @@ import (
 
 const calculateTaxPath = "/tax/calculations"
 
+var (
+	CorrectCSV = `totalIncome,wht,donation
+500000.0,0.0,0.0
+600000.0,40000.0,20000.0
+750000.0,50000.0,15000.0`
+)
+
 func taxTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	e.Validator = validate.New()
@@ -85,7 +92,7 @@ func TestCalculateTaxCSV(t *testing.T) {
 		}
 		defer database.Close()
 		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
-		body, contentType := mockCSVMultipart("taxFile", "taxFile.csv")
+		body, contentType := mockCSVMultipart("taxFile", "taxFile.csv", CorrectCSV)
 		c, rec := taxCsvTestSetup(model.Test{
 			HttpMethod:  http.MethodPost,
 			Path:        calculateTaxPath,
@@ -104,11 +111,11 @@ func mockDeductionsRows() *sqlmock.Rows {
 		AddRow(common.PersonalDeductionsType, 60000)
 }
 
-func mockCSVMultipart(form, fileName string) (*bytes.Buffer, string) {
+func mockCSVMultipart(form, fileName, csv string) (*bytes.Buffer, string) {
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 	defer writer.Close()
 	filePart, _ := writer.CreateFormFile(form, fileName)
-	filePart.Write([]byte("Hello, World!"))
+	filePart.Write([]byte(csv))
 	return body, writer.FormDataContentType()
 }
