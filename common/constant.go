@@ -1,6 +1,9 @@
 package common
 
 const (
+	// CSV
+	TaxCsvFileName  = "taxFile.csv"
+	TaxCsvFieldName = "taxFile"
 	// Tax Level
 	TaxLevel1      = "0-150000"
 	TaxLevel2      = "150,001-500,000"

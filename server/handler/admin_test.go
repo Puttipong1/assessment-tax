@@ -22,7 +22,7 @@ import (
 func adminTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	e.Validator = validate.New()
-	req := httptest.NewRequest(test.HttpMethod, test.Path, bytes.NewBuffer(test.Json))
+	req := httptest.NewRequest(test.HttpMethod, test.Path, test.Body)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -35,7 +35,7 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/k-receipt",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -59,7 +59,7 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/k-receipt",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -79,7 +79,7 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/k-receipt",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -99,7 +99,7 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/k-receipt",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -119,7 +119,7 @@ func TestUpdateKReceiptDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/k-receipt",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -140,7 +140,7 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/personal",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -164,7 +164,7 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/personal",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -184,7 +184,7 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/personal",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -204,7 +204,7 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/personal",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {
@@ -224,7 +224,7 @@ func TestUpdatePersonalDeduction(t *testing.T) {
 		c, rec := adminTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
 			Path:       "/admin/deductions/personal",
-			Json:       body,
+			Body:       bytes.NewBuffer(body),
 		})
 		database, mock, err := sqlmock.New()
 		if err != nil {

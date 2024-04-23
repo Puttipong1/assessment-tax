@@ -43,3 +43,23 @@ func (handler *TaxHandler) CalculateTax(c echo.Context) error {
 	log.Info().Msgf("%f", handler.TaxService.CalculateTax(tax, deduction).Tax)
 	return c.JSON(http.StatusOK, handler.TaxService.CalculateTax(tax, deduction))
 }
+
+func (handler *TaxHandler) CalculateTaxCSV(c echo.Context) error {
+	log := config.Logger()
+	csv, err := c.FormFile("taxFile")
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return c.JSON(http.StatusBadRequest, response.Error{Message: err.Error()})
+	}
+	if csv.Filename != common.TaxCsvFileName {
+		log.Error().Msgf("File name is %s expect %s", csv.Filename, common.TaxCsvFileName)
+		return c.JSON(http.StatusBadRequest, response.Error{Message: "Tax Csv file name is incorrect"})
+	}
+	file, err := csv.Open()
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return c.JSON(http.StatusBadRequest, response.Error{Message: err.Error()})
+	}
+	defer file.Close()
+	return c.JSON(http.StatusOK, "")
+}

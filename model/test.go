@@ -1,7 +1,10 @@
 package model
 
+import "bytes"
+
 type Test struct {
-	HttpMethod string
-	Path       string
-	Json       []byte
+	HttpMethod  string
+	Path        string
+	Body        *bytes.Buffer
+	ContentType string
 }
