@@ -24,4 +24,5 @@ const (
 	GetEnvErrorMessage         = "Can't get %s from env: %s"
 	ShutDownServerMessage      = "Shutting down server"
 	IncorrectDeductionsMessage = "%s has incorrect amount"
+	InvalidCsvFileMessage      = "CSV File is incorrect or corrupt"
 )

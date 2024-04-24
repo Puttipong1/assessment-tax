@@ -44,21 +44,21 @@ func (service *TaxService) CalculateTax(t request.Tax, deduction model.Deduction
 	return summary
 }
 
-func (service *TaxService) ReadTaxCSV(file multipart.File) {
+func (service *TaxService) ReadTaxCSV(file multipart.File) error {
 	log := config.Logger()
 	buffer := new(bytes.Buffer)
 	if _, err := io.Copy(buffer, file); err != nil {
 		log.Error().Msg(err.Error())
+		return &response.Error{Message: common.InvalidCsvFileMessage}
 	}
 	log.Info().Msg(string(buffer.Bytes()[:]))
 	taxCsv := []model.TaxCSV{}
 	if err := csvutil.Unmarshal(buffer.Bytes(), &taxCsv); err != nil {
 		log.Error().Msg(err.Error())
+		return err
 	}
-	log.Info().Msgf("test %d", len(taxCsv))
-	for _, csv := range taxCsv {
-		log.Info().Msgf("%f %f %f", csv.TotalIncome, csv.Wht, csv.Donation)
-	}
+	log.Info().Msgf("total tax in csv is %d", len(taxCsv))
+	return nil
 }
 
 func calculateNetIncome(income float64, deduction *model.Deduction) float64 {

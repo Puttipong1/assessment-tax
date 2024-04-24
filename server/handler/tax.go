@@ -12,6 +12,7 @@ import (
 	"github.com/Puttipong1/assessment-tax/server/validate"
 	"github.com/Puttipong1/assessment-tax/service"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 )
 
 type TaxHandler struct {
@@ -45,6 +46,7 @@ func (handler *TaxHandler) CalculateTax(c echo.Context) error {
 }
 
 func (handler *TaxHandler) CalculateTaxCSV(c echo.Context) error {
+	decimal.MarshalJSONWithoutQuotes = true
 	log := config.Logger()
 	csv, err := c.FormFile("taxFile")
 	if err != nil {
@@ -62,5 +64,5 @@ func (handler *TaxHandler) CalculateTaxCSV(c echo.Context) error {
 	}
 	defer file.Close()
 	handler.TaxService.ReadTaxCSV(file)
-	return c.JSON(http.StatusOK, "")
+	return c.NoContent(http.StatusOK)
 }

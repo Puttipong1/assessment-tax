@@ -2,6 +2,7 @@ package response
 
 import (
 	"github.com/Puttipong1/assessment-tax/common"
+	"github.com/shopspring/decimal"
 )
 
 type TaxSummary struct {
@@ -13,6 +14,15 @@ type TaxSummary struct {
 type TaxLevel struct {
 	Level string  `json:"level"`
 	Tax   float64 `json:"tax"`
+}
+
+type Tax struct {
+	Taxes []TaxCsv `json:taxes`
+}
+type TaxCsv struct {
+	TotalIncome decimal.Decimal `json:"totalIncome"`
+	Tax         decimal.Decimal `json:"tax"`
+	TaxRefund   decimal.Decimal `json:"taxRefund,omitempty"`
 }
 
 func NewTaxLevel1() []TaxLevel {
