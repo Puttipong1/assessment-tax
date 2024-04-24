@@ -5,6 +5,7 @@ import (
 	"github.com/Puttipong1/assessment-tax/config"
 	"github.com/Puttipong1/assessment-tax/model"
 	"github.com/Puttipong1/assessment-tax/model/response"
+	"github.com/shopspring/decimal"
 )
 
 type deduction struct {
@@ -53,9 +54,8 @@ func (db *DB) GetDeductions() (model.Deduction, error) {
 	}
 	for _, deduction := range deductions {
 		if deduction.deduction == common.PersonalDeductionsType {
-			d.Personal = deduction.amount
+			d.Personal = decimal.NewFromFloat(deduction.amount)
 		}
 	}
-	log.Info().Msgf("deductions: %v", d)
 	return d, nil
 }

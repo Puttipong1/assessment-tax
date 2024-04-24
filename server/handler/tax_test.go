@@ -3,11 +3,10 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -20,6 +19,7 @@ import (
 	"github.com/Puttipong1/assessment-tax/server/validate"
 	"github.com/Puttipong1/assessment-tax/service"
 	"github.com/labstack/echo/v4"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,6 +33,7 @@ var (
 )
 
 func taxTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
+	decimal.MarshalJSONWithoutQuotes = true
 	e := echo.New()
 	e.Validator = validate.New()
 	req := httptest.NewRequest(test.HttpMethod, test.Path, test.Body)
@@ -43,6 +44,7 @@ func taxTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
 }
 
 func taxCsvTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
+	decimal.MarshalJSONWithoutQuotes = true
 	e := echo.New()
 	e.Validator = validate.New()
 	req := httptest.NewRequest(test.HttpMethod, test.Path, test.Body)
@@ -74,12 +76,10 @@ func TestCalculateTax(t *testing.T) {
 		})
 		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
 		if assert.NoError(t, h.CalculateTax(c)) {
-			var res response.TaxSummary
-			err := json.Unmarshal(rec.Body.Bytes(), &res)
+			expect, err := json.Marshal(response.TaxSummary{Tax: decimal.NewFromInt(224000), TaxLevel: response.NewTaxLevel5(decimal.NewFromInt(154000))})
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, rec.Code)
-			fmt.Println(rec.Body.String())
-			assert.True(t, reflect.DeepEqual(response.TaxSummary{Tax: 224000, TaxLevel: response.NewTaxLevel5(154000.0)}, res))
+			assert.Equal(t, strings.Replace(rec.Body.String(), "\n", "", 1), string(expect))
 		}
 	})
 }

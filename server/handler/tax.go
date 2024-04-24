@@ -28,6 +28,7 @@ func NewTaxHandler(server *server.Server) *TaxHandler {
 }
 
 func (handler *TaxHandler) CalculateTax(c echo.Context) error {
+	decimal.MarshalJSONWithoutQuotes = true
 	log := config.Logger()
 	var tax = request.Tax{}
 	if err := c.Bind(&tax); err != nil {
@@ -41,7 +42,6 @@ func (handler *TaxHandler) CalculateTax(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Error{Message: ""})
 	}
-	log.Info().Msgf("%f", handler.TaxService.CalculateTax(tax, deduction).Tax)
 	return c.JSON(http.StatusOK, handler.TaxService.CalculateTax(tax, deduction))
 }
 
