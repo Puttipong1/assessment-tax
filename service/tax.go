@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"mime/multipart"
 
@@ -45,20 +46,34 @@ func (service *TaxService) CalculateTax(t request.Tax, deduction model.Deduction
 	return summary
 }
 
-func (service *TaxService) ReadTaxCSV(file multipart.File) error {
+func (service *TaxService) CalculateTaxCSV(file multipart.File, deduction model.Deduction) (*response.Tax, error) {
+	taxes, err := readTaxCSV(file)
+	taxCSV := []response.TaxCsv{}
+	if err != nil {
+		return nil, err
+	}
+	for _, tax := range taxes {
+		res := service.CalculateTax(tax, deduction)
+		taxCSV = append(taxCSV, response.TaxCsv{
+			TotalIncome: decimal.NewFromFloat(tax.TotalIncome), Tax: res.Tax, TaxRefund: res.TaxRefund,
+		})
+	}
+	return &response.Tax{Taxes: taxCSV}, nil
+}
+
+func readTaxCSV(file multipart.File) ([]request.Tax, error) {
 	log := config.Logger()
 	buffer := new(bytes.Buffer)
 	if _, err := io.Copy(buffer, file); err != nil {
 		log.Error().Msg(err.Error())
-		return &response.Error{Message: common.InvalidCsvFileMessage}
+		return nil, &response.Error{Message: common.InvalidCsvFileMessage}
 	}
-	log.Info().Msg(string(buffer.Bytes()[:]))
 	taxCsv := []model.TaxCSV{}
 	if err := csvutil.Unmarshal(buffer.Bytes(), &taxCsv); err != nil {
 		log.Error().Msg(err.Error())
-		return err
+		return nil, err
 	}
-	return nil
+	return validateTaxCSV(taxCsv)
 }
 
 func calculateNetIncome(income decimal.Decimal, deduction *model.Deduction) decimal.Decimal {
@@ -110,4 +125,21 @@ func sumTaxLevel(taxLevel []response.TaxLevel) decimal.Decimal {
 		sum = sum.Add(level.Tax)
 	}
 	return sum
+}
+
+func validateTaxCSV(csv []model.TaxCSV) ([]request.Tax, error) {
+	tax := []request.Tax{}
+	for i, c := range csv {
+		if c.TotalIncome < c.Wht {
+			return nil, &response.Error{Message: fmt.Sprintf(common.WHTIsMoreThanTotalIncomeMessage, i+2)}
+		}
+		tax = append(tax, request.Tax{
+			TotalIncome: c.TotalIncome,
+			Wht:         c.Wht,
+			Allowances: []request.Allowances{
+				{AllowanceType: common.DonationsDeductionsType, Amount: c.Donation},
+			},
+		})
+	}
+	return tax, nil
 }

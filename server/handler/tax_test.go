@@ -101,7 +101,14 @@ func TestCalculateTaxCSV(t *testing.T) {
 		})
 		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
 		if assert.NoError(t, h.CalculateTaxCSV(c)) {
+			expect, err := json.Marshal(response.Tax{Taxes: []response.TaxCsv{
+				{TotalIncome: decimal.NewFromInt(500000), Tax: decimal.NewFromInt(29000)},
+				{TotalIncome: decimal.NewFromInt(600000), Tax: decimal.NewFromInt(2000)},
+				{TotalIncome: decimal.NewFromInt(750000), Tax: decimal.NewFromInt(11250)},
+			}})
+			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, strings.Replace(rec.Body.String(), "\n", "", 1), string(expect))
 		}
 	})
 }

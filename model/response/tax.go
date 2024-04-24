@@ -20,9 +20,9 @@ type Tax struct {
 	Taxes []TaxCsv `json:taxes`
 }
 type TaxCsv struct {
-	TotalIncome decimal.Decimal `json:"totalIncome"`
-	Tax         decimal.Decimal `json:"tax"`
-	TaxRefund   decimal.Decimal `json:"taxRefund,omitempty"`
+	TotalIncome decimal.Decimal  `json:"totalIncome"`
+	Tax         decimal.Decimal  `json:"tax"`
+	TaxRefund   *decimal.Decimal `json:"taxRefund,omitempty"`
 }
 
 func NewTaxLevel1() []TaxLevel {

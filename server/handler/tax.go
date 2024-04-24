@@ -63,6 +63,13 @@ func (handler *TaxHandler) CalculateTaxCSV(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Error{Message: err.Error()})
 	}
 	defer file.Close()
-	handler.TaxService.ReadTaxCSV(file)
-	return c.NoContent(http.StatusOK)
+	deduction, err := handler.DB.GetDeductions()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Error{Message: ""})
+	}
+	res, err := handler.TaxService.CalculateTaxCSV(file, deduction)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, response.Error{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, res)
 }
