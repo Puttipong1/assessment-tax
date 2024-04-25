@@ -1,10 +1,8 @@
 package model
 
-type Deduction struct {
-	Personal float64
-	Donation float64
-}
+import "github.com/shopspring/decimal"
 
-func (d *Deduction) SetDonation(donation float64) {
-	d.Donation = donation
+type Deduction struct {
+	Personal decimal.Decimal
+	Donation decimal.Decimal
 }

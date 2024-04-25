@@ -27,6 +27,7 @@ func ConfigureRoutes(server *server.Server) {
 		},
 	}))
 	server.Echo.POST("/tax/calculations", taxHandler.CalculateTax)
+	server.Echo.POST("/tax/calculations/upload-csv", taxHandler.CalculateTaxCSV)
 	a := server.Echo.Group("/admin")
 	a.Use(middleware.BasicAuth(func(username, password string, ctx echo.Context) (bool, error) {
 		if username == server.Config.AdminConfig().UserName() && password == server.Config.AdminConfig().Password() {
