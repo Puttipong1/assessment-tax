@@ -77,7 +77,7 @@ func readTaxCSV(file multipart.File) ([]request.Tax, error) {
 }
 
 func calculateNetIncome(income decimal.Decimal, deduction *model.Deduction) decimal.Decimal {
-	return income.Sub(deduction.Personal).Sub(deduction.Donation)
+	return income.Sub(deduction.Personal).Sub(deduction.Donation).Sub(deduction.KReceipt)
 }
 
 func calcaluteTaxLevelFromIncome(income decimal.Decimal) []response.TaxLevel {
@@ -99,14 +99,18 @@ func calculateTax(income, base, taxRate decimal.Decimal) decimal.Decimal {
 }
 
 func getTotalAllowanceByType(allowances []request.Allowances, deduction model.Deduction) model.Deduction {
-	totalDonations := decimal.NewFromInt(0.0)
+	totalDonations := decimal.NewFromInt(0)
+	totalKReceipt := decimal.NewFromInt(0)
 	for _, allowance := range allowances {
 		switch allowance.AllowanceType {
 		case common.DonationsDeductionsType:
 			totalDonations = totalDonations.Add(decimal.NewFromFloat(allowance.Amount))
+		case common.KReceiptDeductionsType:
+			totalKReceipt = totalKReceipt.Add(decimal.NewFromFloat(allowance.Amount))
 		}
 	}
 	deduction.Donation = decimal.Min(totalDonations, donationMaxDeductions)
+	deduction.KReceipt = decimal.Min(totalKReceipt, deduction.KReceipt)
 	return deduction
 }
 

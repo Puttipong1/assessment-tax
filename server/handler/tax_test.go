@@ -66,8 +66,8 @@ func TestCalculateTax(t *testing.T) {
 			TotalIncome: 2600000,
 			Wht:         240000,
 			Allowances: []request.Allowances{
-				{AllowanceType: "donation", Amount: 100000},
-			},
+				{AllowanceType: common.DonationsDeductionsType, Amount: 100000},
+				{AllowanceType: common.KReceiptDeductionsType, Amount: 100000}},
 		})
 		c, rec := taxTestSetup(model.Test{
 			HttpMethod: http.MethodPost,
@@ -76,7 +76,7 @@ func TestCalculateTax(t *testing.T) {
 		})
 		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
 		if assert.NoError(t, h.CalculateTax(c)) {
-			expect, err := json.Marshal(response.TaxSummary{Tax: decimal.NewFromInt(224000), TaxLevel: response.NewTaxLevel5(decimal.NewFromInt(154000))})
+			expect, err := json.Marshal(response.TaxSummary{Tax: decimal.NewFromInt(206500), TaxLevel: response.NewTaxLevel5(decimal.NewFromInt(136500))})
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, rec.Code)
 			assert.Equal(t, strings.Replace(rec.Body.String(), "\n", "", 1), string(expect))
