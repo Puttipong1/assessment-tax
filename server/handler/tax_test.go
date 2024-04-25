@@ -115,7 +115,8 @@ func TestCalculateTaxCSV(t *testing.T) {
 
 func mockDeductionsRows() *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"type", "amount"}).
-		AddRow(common.PersonalDeductionsType, 60000)
+		AddRow(common.PersonalDeductionsType, 60000).
+		AddRow(common.KReceiptDeductionsType, 50000)
 }
 
 func mockCSVMultipart(form, fileName, csv string) (*bytes.Buffer, string) {
