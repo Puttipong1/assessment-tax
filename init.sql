@@ -9,3 +9,4 @@ CREATE TABLE IF NOT EXISTS deductions
 
 INSERT INTO "deductions" ("type", "amount") VALUES ('personal', 50000.0)  ON conflict ("type") do nothing; 
 INSERT INTO "deductions" ("type", "amount") VALUES ('k-receipt', 50000.0) ON conflict ("type") do nothing;
+INSERT INTO "deductions" ("type", "amount") VALUES ('donation', 100000.0) ON conflict ("type") do nothing;

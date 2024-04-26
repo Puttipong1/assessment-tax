@@ -23,16 +23,15 @@ func NewTaxService() *TaxService {
 }
 
 var (
-	zeroDecimal           = decimal.NewFromInt(0)
-	donationMaxDeductions = decimal.NewFromFloat(100000.0)
-	level2BaseTax         = decimal.NewFromFloat(150000.0)
-	level2TaxRate         = decimal.NewFromFloat(0.1)
-	level3BaseTax         = decimal.NewFromFloat(500000.0)
-	level3TaxRate         = decimal.NewFromFloat(0.15)
-	level4BaseTax         = decimal.NewFromFloat(1000000.0)
-	level4TaxRate         = decimal.NewFromFloat(0.2)
-	level5BaseTax         = decimal.NewFromFloat(2000000.0)
-	level5TaxRate         = decimal.NewFromFloat(0.35)
+	zeroDecimal   = decimal.NewFromInt(0)
+	level2BaseTax = decimal.NewFromFloat(150000.0)
+	level2TaxRate = decimal.NewFromFloat(0.1)
+	level3BaseTax = decimal.NewFromFloat(500000.0)
+	level3TaxRate = decimal.NewFromFloat(0.15)
+	level4BaseTax = decimal.NewFromFloat(1000000.0)
+	level4TaxRate = decimal.NewFromFloat(0.2)
+	level5BaseTax = decimal.NewFromFloat(2000000.0)
+	level5TaxRate = decimal.NewFromFloat(0.35)
 )
 
 func (service *TaxService) CalculateTax(t request.Tax, deduction model.Deduction) response.TaxSummary {
@@ -117,7 +116,7 @@ func getTotalAllowanceByType(allowances []request.Allowances, deduction model.De
 			totalKReceipt = totalKReceipt.Add(decimal.NewFromFloat(allowance.Amount))
 		}
 	}
-	deduction.Donation = decimal.Min(totalDonations, donationMaxDeductions)
+	deduction.Donation = decimal.Min(totalDonations, deduction.Donation)
 	deduction.KReceipt = decimal.Min(totalKReceipt, deduction.KReceipt)
 	return deduction
 }

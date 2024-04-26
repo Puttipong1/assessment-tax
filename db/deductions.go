@@ -36,8 +36,8 @@ func (db *DB) UpdateDeductions(deductionsType string, amount float64) error {
 func (db *DB) GetDeductions() (model.Deduction, error) {
 	log := config.Logger()
 	d := model.Deduction{}
-	query := "SELECT type, amount FROM deductions WHERE type IN ($1, $2)"
-	rows, err := db.DB.Query(query, common.PersonalDeductionsType, common.KReceiptDeductions)
+	query := "SELECT type, amount FROM deductions WHERE type IN ($1, $2, $3)"
+	rows, err := db.DB.Query(query, common.PersonalDeductionsType, common.KReceiptDeductions, common.DonationsDeductionsType)
 	if err != nil {
 		log.Error().Err(err).Msg("Can't get deductions from database")
 		return d, err
@@ -59,6 +59,10 @@ func (db *DB) GetDeductions() (model.Deduction, error) {
 		if deduction.deduction == common.KReceiptDeductionsType {
 			d.KReceipt = decimal.NewFromFloat(deduction.amount)
 		}
+		if deduction.deduction == common.DonationsDeductionsType {
+			d.Donation = decimal.NewFromFloat(deduction.amount)
+		}
+
 	}
 	log.Info().Msgf("DB: Personal Deduction: %s, K-Receipt Deduction: %s", d.Personal, d.KReceipt)
 	return d, nil
