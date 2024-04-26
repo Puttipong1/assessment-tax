@@ -30,6 +30,9 @@ func main() {
 	<-ctx.Done()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	if err := server.DB.DB.Close(); err != nil {
+		log.Fatal().Err(err).Msg(common.ShutDownServerMessage)
+	}
 	if err := server.Echo.Shutdown(ctx); err != nil {
 		log.Fatal().Err(err).Msg(common.ShutDownServerMessage)
 	}

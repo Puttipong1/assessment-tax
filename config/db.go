@@ -6,17 +6,17 @@ type DBConfig struct {
 	user     string
 	password string
 	name     string
-	host     string
+	url      string
 	port     string
 }
 
 func LoadDBConfig() DBConfig {
 	return DBConfig{
-		user:     os.Getenv("DB_USER"),
-		password: os.Getenv("DB_PASSWORD"),
-		name:     os.Getenv("DB_NAME"),
-		host:     os.Getenv("DB_HOST"),
-		port:     os.Getenv("DB_PORT"),
+		user:     os.Getenv("DATABASE_USER"),
+		password: os.Getenv("DATABASE_PASSWORD"),
+		name:     os.Getenv("DATABASE_NAME"),
+		url:      os.Getenv("DATABASE_URL"),
+		port:     os.Getenv("DATABASE_PORT"),
 	}
 }
 
@@ -29,8 +29,8 @@ func (dbConfig *DBConfig) Password() string {
 func (dbConfig *DBConfig) Name() string {
 	return dbConfig.name
 }
-func (dbConfig *DBConfig) Host() string {
-	return dbConfig.host
+func (dbConfig *DBConfig) Url() string {
+	return dbConfig.url
 }
 func (dbConfig *DBConfig) Port() string {
 	return dbConfig.port
