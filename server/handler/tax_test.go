@@ -30,6 +30,14 @@ var (
 500000.0,0.0,0.0
 600000.0,40000.0,20000.0
 750000.0,50000.0,15000.0`
+	IncorrectHeaderCSV = `income,wha,donate
+500000.0,0.0,0.0
+600000.0,40000.0,20000.0
+750000.0,50000.0,15000.0`
+	IncorrectAmountCSV = `totalIncome,wht,donation
+500000.0,0.0,0.0
+600000.0,40000.0,20000.0
+750000.0,50000.0,15000.0`
 )
 
 func taxTestSetup(test model.Test) (echo.Context, *httptest.ResponseRecorder) {
@@ -359,6 +367,26 @@ func TestCalculateTaxCSV(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, http.StatusOK, rec.Code)
 			assert.Equal(t, strings.Replace(rec.Body.String(), "\n", "", 1), string(expect))
+		}
+	})
+	t.Run("CalculateTaxCSV incorrect header fail", func(t *testing.T) {
+		database, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
+		body, contentType := mockCSVMultipart("taxFile", "taxFile.csv", IncorrectHeaderCSV)
+		c, rec := taxCsvTestSetup(model.Test{
+			HttpMethod:  http.MethodPost,
+			Path:        calculateTaxPath,
+			Body:        body,
+			ContentType: contentType,
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTaxCSV(c)) {
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.True(t, strings.Contains(rec.Body.String(), common.InvalidCsvFileMessage))
 		}
 	})
 }
