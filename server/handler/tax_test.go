@@ -189,6 +189,149 @@ func TestCalculateTax(t *testing.T) {
 			assert.Equal(t, strings.Replace(rec.Body.String(), "\n", "", 1), string(expect))
 		}
 	})
+	t.Run("CalculateTax with tax refund Success", func(t *testing.T) {
+		database, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
+		body, _ := json.Marshal(request.Tax{
+			TotalIncome: 2600000,
+			Wht:         500000,
+			Allowances: []request.Allowances{
+				{AllowanceType: common.DonationsDeductionsType, Amount: 100000},
+				{AllowanceType: common.KReceiptDeductionsType, Amount: 100000}},
+		})
+		c, rec := taxTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       calculateTaxPath,
+			Body:       bytes.NewBuffer(body),
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTax(c)) {
+			refund := decimal.NewFromInt(53500)
+			expect, err := json.Marshal(response.TaxSummary{Tax: decimal.NewFromInt(0), TaxRefund: &refund, TaxLevel: response.NewTaxLevel5(decimal.NewFromInt(136500))})
+			assert.NoError(t, err)
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, strings.Replace(rec.Body.String(), "\n", "", 1), string(expect))
+		}
+	})
+	t.Run("CalculateTax has incorrect total income and wht fail", func(t *testing.T) {
+		database, _, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		body, _ := json.Marshal(request.Tax{
+			TotalIncome: -44444,
+			Wht:         -44444,
+		},
+		)
+		c, rec := taxTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       calculateTaxPath,
+			Body:       bytes.NewBuffer(body),
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTax(c)) {
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+		}
+	})
+	t.Run("CalculateTax wht is more than total income fail", func(t *testing.T) {
+		database, _, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		body, _ := json.Marshal(request.Tax{
+			TotalIncome: 500000,
+			Wht:         600000,
+		},
+		)
+		c, rec := taxTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       calculateTaxPath,
+			Body:       bytes.NewBuffer(body),
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTax(c)) {
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+		}
+	})
+	t.Run("CalculateTax has incorrect allowances.amount fail", func(t *testing.T) {
+		database, _, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		body, _ := json.Marshal(request.Tax{
+			TotalIncome: 500000,
+			Wht:         200000,
+			Allowances: []request.Allowances{
+				{AllowanceType: common.DonationsDeductionsType, Amount: -5555},
+			},
+		},
+		)
+		c, rec := taxTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       calculateTaxPath,
+			Body:       bytes.NewBuffer(body),
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTax(c)) {
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+		}
+	})
+	t.Run("CalculateTax has incorrect allowances.allowanceType fail", func(t *testing.T) {
+		database, _, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		body, _ := json.Marshal(request.Tax{
+			TotalIncome: 500000,
+			Wht:         200000,
+			Allowances: []request.Allowances{
+				{AllowanceType: common.GetEnvErrorMessage, Amount: 30000},
+			},
+		},
+		)
+		c, rec := taxTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       calculateTaxPath,
+			Body:       bytes.NewBuffer(body),
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTax(c)) {
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+		}
+	})
+	t.Run("CalculateTax has same allowances.allowanceType fail", func(t *testing.T) {
+		database, _, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		body, _ := json.Marshal(request.Tax{
+			TotalIncome: 500000,
+			Wht:         200000,
+			Allowances: []request.Allowances{
+				{AllowanceType: common.DonationsDeductionsType, Amount: 30000},
+				{AllowanceType: common.DonationsDeductionsType, Amount: 30000},
+			},
+		},
+		)
+		c, rec := taxTestSetup(model.Test{
+			HttpMethod: http.MethodPost,
+			Path:       calculateTaxPath,
+			Body:       bytes.NewBuffer(body),
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTax(c)) {
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+		}
+	})
 }
 
 func TestCalculateTaxCSV(t *testing.T) {
