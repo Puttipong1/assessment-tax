@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS deductions
     amount numeric NOT NULL,
     CONSTRAINT deductions_pkey PRIMARY KEY (id),
     CONSTRAINT deductions_type UNIQUE (type)
-)
+);
 
 INSERT INTO "deductions" ("type", "amount") VALUES ('personal', 50000.0)  ON conflict ("type") do nothing; 
 INSERT INTO "deductions" ("type", "amount") VALUES ('k-receipt', 50000.0) ON conflict ("type") do nothing;
