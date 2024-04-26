@@ -2,9 +2,11 @@ package service
 
 import (
 	"bytes"
+	"encoding/csv"
 	"fmt"
 	"io"
 	"mime/multipart"
+	"slices"
 
 	"github.com/Puttipong1/assessment-tax/common"
 	"github.com/Puttipong1/assessment-tax/config"
@@ -32,6 +34,7 @@ var (
 	level4TaxRate = decimal.NewFromFloat(0.2)
 	level5BaseTax = decimal.NewFromFloat(2000000.0)
 	level5TaxRate = decimal.NewFromFloat(0.35)
+	csvHeader     = []string{"totalIncome", "wht", "donation"}
 )
 
 func (service *TaxService) CalculateTax(t request.Tax, deduction model.Deduction) response.TaxSummary {
@@ -67,8 +70,18 @@ func readTaxCSV(file multipart.File) ([]request.Tax, error) {
 		log.Error().Msg(err.Error())
 		return nil, &response.Error{Message: common.InvalidCsvFileMessage}
 	}
+	decoder, err := csvutil.NewDecoder(csv.NewReader(bytes.NewReader(buffer.Bytes())))
+	decoder.DisallowMissingColumns = true
+	if err != nil {
+		return nil, &response.Error{Message: common.InvalidCsvFileMessage}
+	}
+	if !slices.Equal(decoder.Header(), csvHeader) {
+		return nil, &response.Error{Message: common.InvalidCsvFileMessage}
+	}
+	decoder.DisallowMissingColumns = true
+
 	taxCsv := []model.TaxCSV{}
-	if err := csvutil.Unmarshal(buffer.Bytes(), &taxCsv); err != nil {
+	if err := decoder.Decode(&taxCsv); err != nil {
 		log.Error().Msg(err.Error())
 		return nil, err
 	}
@@ -126,7 +139,6 @@ func getTaxSummary(tax, wht decimal.Decimal) response.TaxSummary {
 		return response.TaxSummary{Tax: zeroDecimal}
 	}
 	total := tax.Sub(wht)
-	fmt.Printf("%s - %s = %s", tax, wht, total)
 	if total.LessThan(zeroDecimal) {
 		total = total.Abs()
 		return response.TaxSummary{Tax: zeroDecimal, TaxRefund: &total}
@@ -148,8 +160,11 @@ func sumTaxLevel(taxLevel []response.TaxLevel) decimal.Decimal {
 func validateTaxCSV(csv []model.TaxCSV) ([]request.Tax, error) {
 	tax := []request.Tax{}
 	for i, c := range csv {
+		if c.TotalIncome < 0 || c.Donation < 0 || c.Wht < 0 {
+			return nil, &response.Error{Message: fmt.Sprintf(common.CSVHasLowerThanZeroMessage, i+2)}
+		}
 		if c.TotalIncome < c.Wht {
-			return nil, &response.Error{Message: fmt.Sprintf(common.WHTIsMoreThanTotalIncomeMessage, i+2)}
+			return nil, &response.Error{Message: fmt.Sprintf(common.CSVWHTIsMoreThanTotalIncomeMessage, i+2)}
 		}
 		tax = append(tax, request.Tax{
 			TotalIncome: c.TotalIncome,
