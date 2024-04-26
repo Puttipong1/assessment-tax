@@ -60,6 +60,6 @@ func (db *DB) GetDeductions() (model.Deduction, error) {
 			d.KReceipt = decimal.NewFromFloat(deduction.amount)
 		}
 	}
-	log.Info().Msgf("Personal Deduction: %s, K-Receipt Deduction: %s", d.Personal, d.KReceipt)
+	log.Info().Msgf("DB: Personal Deduction: %s, K-Receipt Deduction: %s", d.Personal, d.KReceipt)
 	return d, nil
 }
