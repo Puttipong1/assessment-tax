@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Puttipong1/assessment-tax/common"
@@ -17,20 +17,24 @@ func main() {
 	log := config.Logger()
 	server := server.NewServer()
 	route.ConfigureRoutes(server)
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
 
 	go func() {
 		err := server.Echo.Start(server.Config.ServerConfig().Port())
-		if err != nil && err != http.ErrServerClosed { // Start server
+		if err != nil {
 			log.Fatal().Err(err).Msg(common.ShutDownServerMessage)
 		}
 	}()
 
-	<-ctx.Done()
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	<-shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	log.Warn().Msg("Shutting down...")
+	if err := server.DB.DB.Close(); err != nil {
+		log.Fatal().Err(err)
+	}
 	if err := server.Echo.Shutdown(ctx); err != nil {
-		log.Fatal().Err(err).Msg(common.ShutDownServerMessage)
+		log.Fatal().Err(err)
 	}
 }

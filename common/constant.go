@@ -22,7 +22,7 @@ const (
 	// Error Message
 	BadRequestErrorMessage          = "Data sent to the server has an error or exceeds a limit"
 	GetEnvErrorMessage              = "Can't get %s from env: %s"
-	ShutDownServerMessage           = "Shutting down server"
+	ShutDownServerMessage           = "Shutdown server"
 	IncorrectDeductionsMessage      = "%s has incorrect amount"
 	InvalidCsvFileMessage           = "CSV File is incorrect or corrupt"
 	WHTIsMoreThanTotalIncomeMessage = "Line %d: Total income should be more than Wht"

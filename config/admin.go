@@ -16,8 +16,7 @@ func loadAdminConfig() AdminConfig {
 	username := os.Getenv("ADMIN_USERNAME")
 	password := os.Getenv("ADMIN_PASSWORD")
 	if username == "" || password == "" {
-		log.Error().Msgf(common.GetEnvErrorMessage, "ADMIN_USERNAME or ADMIN_PASSWORD", common.ShutDownServerMessage)
-		os.Exit(0)
+		log.Fatal().Msgf(common.GetEnvErrorMessage, "ADMIN_USERNAME or ADMIN_PASSWORD", common.ShutDownServerMessage)
 	}
 	return AdminConfig{
 		adminUsername: username,

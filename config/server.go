@@ -10,7 +10,7 @@ type ServerConfig struct {
 
 func LoadServerConfig() ServerConfig {
 	return ServerConfig{
-		port: ":" + os.Getenv("SERVER_PORT"),
+		port: ":" + os.Getenv("PORT"),
 	}
 }
 
