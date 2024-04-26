@@ -23,16 +23,15 @@ func NewTaxService() *TaxService {
 }
 
 var (
-	zeroDecimal           = decimal.NewFromInt(0)
-	donationMaxDeductions = decimal.NewFromFloat(100000.0)
-	level2BaseTax         = decimal.NewFromFloat(150000.0)
-	level2TaxRate         = decimal.NewFromFloat(0.1)
-	level3BaseTax         = decimal.NewFromFloat(500000.0)
-	level3TaxRate         = decimal.NewFromFloat(0.15)
-	level4BaseTax         = decimal.NewFromFloat(1000000.0)
-	level4TaxRate         = decimal.NewFromFloat(0.2)
-	level5BaseTax         = decimal.NewFromFloat(2000000.0)
-	level5TaxRate         = decimal.NewFromFloat(0.35)
+	zeroDecimal   = decimal.NewFromInt(0)
+	level2BaseTax = decimal.NewFromFloat(150000.0)
+	level2TaxRate = decimal.NewFromFloat(0.1)
+	level3BaseTax = decimal.NewFromFloat(500000.0)
+	level3TaxRate = decimal.NewFromFloat(0.15)
+	level4BaseTax = decimal.NewFromFloat(1000000.0)
+	level4TaxRate = decimal.NewFromFloat(0.2)
+	level5BaseTax = decimal.NewFromFloat(2000000.0)
+	level5TaxRate = decimal.NewFromFloat(0.35)
 )
 
 func (service *TaxService) CalculateTax(t request.Tax, deduction model.Deduction) response.TaxSummary {
@@ -77,19 +76,27 @@ func readTaxCSV(file multipart.File) ([]request.Tax, error) {
 }
 
 func calculateNetIncome(income decimal.Decimal, deduction *model.Deduction) decimal.Decimal {
+	log := config.Logger()
+	log.Info().Msgf("income: %s, personal: %s, donation: %s, k-receipt: %s", income, deduction.Personal, deduction.Donation, deduction.KReceipt)
 	return income.Sub(deduction.Personal).Sub(deduction.Donation).Sub(deduction.KReceipt)
 }
 
 func calcaluteTaxLevelFromIncome(income decimal.Decimal) []response.TaxLevel {
+	log := config.Logger()
 	if income.LessThanOrEqual(level2BaseTax) {
+		log.Info().Msgf("Income is %s - %s", income, "Level1")
 		return response.NewTaxLevel1()
 	} else if income.LessThanOrEqual(level3BaseTax) {
+		log.Info().Msgf("Income is %s - %s", income, "Level2")
 		return response.NewTaxLevel2(calculateTax(income, level2BaseTax, level2TaxRate))
 	} else if income.LessThanOrEqual(level4BaseTax) {
+		log.Info().Msgf("Income is %s - %s", income, "Level3")
 		return response.NewTaxLevel3(calculateTax(income, level3BaseTax, level3TaxRate))
 	} else if income.LessThanOrEqual(level5BaseTax) {
+		log.Info().Msgf("Income is %s - %s", income, "Level4")
 		return response.NewTaxLevel4(calculateTax(income, level4BaseTax, level4TaxRate))
 	} else {
+		log.Info().Msgf("Income is %s - %s", income, "Level5")
 		return response.NewTaxLevel5(calculateTax(income, level5BaseTax, level5TaxRate))
 	}
 }
@@ -109,25 +116,32 @@ func getTotalAllowanceByType(allowances []request.Allowances, deduction model.De
 			totalKReceipt = totalKReceipt.Add(decimal.NewFromFloat(allowance.Amount))
 		}
 	}
-	deduction.Donation = decimal.Min(totalDonations, donationMaxDeductions)
+	deduction.Donation = decimal.Min(totalDonations, deduction.Donation)
 	deduction.KReceipt = decimal.Min(totalKReceipt, deduction.KReceipt)
 	return deduction
 }
 
 func getTaxSummary(tax, wht decimal.Decimal) response.TaxSummary {
-	refund := tax.Sub(wht).Abs()
-	if refund.LessThan(zeroDecimal) {
-		return response.TaxSummary{Tax: zeroDecimal, TaxRefund: &refund}
+	if tax.Equal(zeroDecimal) {
+		return response.TaxSummary{Tax: zeroDecimal}
+	}
+	total := tax.Sub(wht)
+	fmt.Printf("%s - %s = %s", tax, wht, total)
+	if total.LessThan(zeroDecimal) {
+		total = total.Abs()
+		return response.TaxSummary{Tax: zeroDecimal, TaxRefund: &total}
 	} else {
-		return response.TaxSummary{Tax: refund}
+		return response.TaxSummary{Tax: total}
 	}
 }
 
 func sumTaxLevel(taxLevel []response.TaxLevel) decimal.Decimal {
+	log := config.Logger()
 	sum := decimal.NewFromInt(0)
 	for _, level := range taxLevel {
 		sum = sum.Add(level.Tax)
 	}
+	log.Info().Msgf("SumTaxLevel: %s", sum)
 	return sum
 }
 
