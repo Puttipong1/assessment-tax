@@ -160,8 +160,11 @@ func sumTaxLevel(taxLevel []response.TaxLevel) decimal.Decimal {
 func validateTaxCSV(csv []model.TaxCSV) ([]request.Tax, error) {
 	tax := []request.Tax{}
 	for i, c := range csv {
+		if c.TotalIncome < 0 || c.Donation < 0 || c.Wht < 0 {
+			return nil, &response.Error{Message: fmt.Sprintf(common.CSVHasLowerThanZeroMessage, i+2)}
+		}
 		if c.TotalIncome < c.Wht {
-			return nil, &response.Error{Message: fmt.Sprintf(common.WHTIsMoreThanTotalIncomeMessage, i+2)}
+			return nil, &response.Error{Message: fmt.Sprintf(common.CSVWHTIsMoreThanTotalIncomeMessage, i+2)}
 		}
 		tax = append(tax, request.Tax{
 			TotalIncome: c.TotalIncome,

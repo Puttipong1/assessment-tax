@@ -20,10 +20,11 @@ const (
 	KReceiptDeductionsType  = "k-receipt"
 	DonationsDeductionsType = "donation"
 	// Error Message
-	BadRequestErrorMessage          = "Data sent to the server has an error or exceeds a limit"
-	GetEnvErrorMessage              = "Can't get %s from env: %s"
-	ShutDownServerMessage           = "Shutdown server"
-	IncorrectDeductionsMessage      = "%s has incorrect amount"
-	InvalidCsvFileMessage           = "CSV File is incorrect or corrupt"
-	WHTIsMoreThanTotalIncomeMessage = "Line %d: Total income should be more than Wht"
+	BadRequestErrorMessage             = "Data sent to the server has an error or exceeds a limit"
+	GetEnvErrorMessage                 = "Can't get %s from env: %s"
+	ShutDownServerMessage              = "Shutdown server"
+	IncorrectDeductionsMessage         = "%s has incorrect amount"
+	InvalidCsvFileMessage              = "CSV File is incorrect or corrupt"
+	CSVWHTIsMoreThanTotalIncomeMessage = "Line %d: Total income should be more than Wht"
+	CSVHasLowerThanZeroMessage         = "Line %d: Has lower than 0.0"
 )
