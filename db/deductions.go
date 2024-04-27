@@ -37,7 +37,7 @@ func (db *DB) GetDeductions() (model.Deduction, error) {
 	log := config.Logger()
 	d := model.Deduction{}
 	query := "SELECT type, amount FROM deductions WHERE type IN ($1, $2, $3)"
-	rows, err := db.DB.Query(query, common.PersonalDeductionsType, common.KReceiptDeductions, common.DonationsDeductionsType)
+	rows, err := db.DB.Query(query, common.PersonalDeductionsType, common.KReceiptDeductionsType, common.DonationsDeductionsType)
 	if err != nil {
 		log.Error().Err(err).Msg("Can't get deductions from database")
 		return d, err
@@ -64,6 +64,6 @@ func (db *DB) GetDeductions() (model.Deduction, error) {
 		}
 
 	}
-	log.Info().Msgf("DB: Personal Deduction: %s, K-Receipt Deduction: %s", d.Personal, d.KReceipt)
+	log.Info().Msgf("DB: Personal Deduction: %s, K-Receipt Deduction: %s, Donation Deduction: %s", d.Personal, d.KReceipt, d.Donation)
 	return d, nil
 }
