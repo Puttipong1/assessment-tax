@@ -350,7 +350,7 @@ func TestCalculateTaxCSV(t *testing.T) {
 		}
 		defer database.Close()
 		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
-		body, contentType := mockCSVMultipart("taxFile", "taxFile.csv", CorrectCSV)
+		body, contentType := mockCSVMultipart("taxFile", common.TaxCsvFileName, CorrectCSV)
 		c, rec := taxCsvTestSetup(model.Test{
 			HttpMethod:  http.MethodPost,
 			Path:        calculateTaxPath,
@@ -377,7 +377,7 @@ func TestCalculateTaxCSV(t *testing.T) {
 		}
 		defer database.Close()
 		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
-		body, contentType := mockCSVMultipart("taxFile", "taxFile.csv", IncorrectHeaderCSV)
+		body, contentType := mockCSVMultipart("taxFile", common.TaxCsvFileName, IncorrectHeaderCSV)
 		c, rec := taxCsvTestSetup(model.Test{
 			HttpMethod:  http.MethodPost,
 			Path:        calculateTaxPath,
@@ -397,7 +397,27 @@ func TestCalculateTaxCSV(t *testing.T) {
 		}
 		defer database.Close()
 		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
-		body, contentType := mockCSVMultipart("taxFile", "taxFile.csv", IncorrectColumnMissingCSV)
+		body, contentType := mockCSVMultipart("taxFile", common.TaxCsvFileName, IncorrectColumnMissingCSV)
+		c, rec := taxCsvTestSetup(model.Test{
+			HttpMethod:  http.MethodPost,
+			Path:        calculateTaxPath,
+			Body:        body,
+			ContentType: contentType,
+		})
+		h := &handler.TaxHandler{DB: &db.DB{DB: database}, TaxService: service.NewTaxService()}
+		if assert.NoError(t, h.CalculateTaxCSV(c)) {
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+		}
+	})
+	t.Run("CalculateTaxCSV has column lower than 0 fail", func(t *testing.T) {
+		database, mock, err := sqlmock.New()
+		if err != nil {
+			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		}
+		defer database.Close()
+		mock.ExpectQuery("SELECT").WillReturnRows(mockDeductionsRows())
+		body, contentType := mockCSVMultipart("taxFile", common.TaxCsvFileName, IncorrectLowerThanZeroCSV)
 		c, rec := taxCsvTestSetup(model.Test{
 			HttpMethod:  http.MethodPost,
 			Path:        calculateTaxPath,
